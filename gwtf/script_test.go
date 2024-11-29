@@ -1,21 +1,23 @@
 package gwtf
 
 import (
+	"context"
 	"testing"
 
 	"github.com/onflow/cadence"
-	"github.com/onflow/flow-cli/pkg/flowkit/output"
+	"github.com/onflow/flowkit/v2/output"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetupFails(t *testing.T) {
 
 	g := NewGoWithTheFlow([]string{"../examples/flow.json"}, "emulator", true, output.NoneLog)
-	_, err := g.CreateAccountsE("foobar")
+	ctx := context.Background()
+	_, err := g.CreateAccountsE(ctx, "foobar")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "could not find account with name foobar")
-
 }
+
 func TestScriptArguments(t *testing.T) {
 	g := NewGoWithTheFlow([]string{"../examples/flow.json"}, "emulator", true, output.NoneLog)
 	t.Parallel()
@@ -40,7 +42,6 @@ func TestScriptArguments(t *testing.T) {
 		assert.Contains(t, builder.Arguments, ufix)
 		assert.Contains(t, builder.Arguments, NewCadenceString("test"))
 		assert.Contains(t, builder.Arguments, dateFix)
-
 	})
 
 	t.Run("Word argument test", func(t *testing.T) {

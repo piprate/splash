@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	"github.com/onflow/cadence"
-	"github.com/onflow/flow-cli/pkg/flowkit/output"
+	"github.com/onflow/flowkit/v2/output"
 	"github.com/stretchr/testify/assert"
 )
 
 /*
- Tests must be in the same folder as flow.json with contracts and transactions/scripts in subdirectories in order for the path resolver to work correctly
+Tests must be in the same folder as flow.json with contracts and transactions/scripts in subdirectories in order for the path resolver to work correctly
 */
 func TestTransactionArguments(t *testing.T) {
 	g := NewGoWithTheFlow([]string{"../examples/flow.json"}, "emulator", true, output.NoneLog)
