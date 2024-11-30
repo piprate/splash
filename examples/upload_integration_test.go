@@ -1,30 +1,32 @@
 package main
 
 import (
-	"github.com/bjartek/go-with-the-flow/v2/gwtf"
-	"github.com/stretchr/testify/assert"
+	"context"
 	"testing"
+
+	"github.com/piprate/splash/gwtf"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestTransactionUpload(t *testing.T) {
 	g := gwtf.NewTestingEmulator()
 
 	t.Run("Upload image file invalid file", func(t *testing.T) {
-
-		err := g.UploadImageAsDataUrl("testFile2.txt", "first")
+		ctx := context.Background()
+		err := g.UploadImageAsDataURL(ctx, "testFile2.txt", "first")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "could not read imageFile testFile2.txt")
 	})
 
 	t.Run("Upload test file invalid file", func(t *testing.T) {
-
-		err := g.UploadFile("testFile2.txt", "first")
+		ctx := context.Background()
+		err := g.UploadFile(ctx, "testFile2.txt", "first")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "could not read file testFile2.txt")
 	})
 
 	t.Run("Upload test file", func(t *testing.T) {
-
+		ctx := context.Background()
 		//need flow in account to upload
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
@@ -33,7 +35,7 @@ func TestTransactionUpload(t *testing.T) {
 			Test(t).
 			AssertSuccess()
 
-		err := g.UploadFile("testFile.txt", "first")
+		err := g.UploadFile(ctx, "testFile.txt", "first")
 		assert.NoError(t, err)
 		g.Transaction(`
 import Debug from "../contracts/Debug.cdc"
@@ -50,7 +52,7 @@ transaction {
 	})
 
 	t.Run("Upload test image", func(t *testing.T) {
-
+		ctx := context.Background()
 		//need flow in account to upload
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
@@ -59,7 +61,7 @@ transaction {
 			Test(t).
 			AssertSuccess()
 
-		err := g.UploadImageAsDataUrl("pig.png", "first")
+		err := g.UploadImageAsDataURL(ctx, "pig.png", "first")
 		assert.NoError(t, err)
 		g.Transaction(`
 import Debug from "../contracts/Debug.cdc"
@@ -76,23 +78,23 @@ transaction {
 	})
 
 	t.Run("Download and upload file fails wrong url", func(t *testing.T) {
-
-		err := g.DownloadAndUploadFile("https://foo.bar", "first")
+		ctx := context.Background()
+		err := g.DownloadAndUploadFile(ctx, "https://foo.bar", "first")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "dial tcp: lookup foo.ba")
 
 	})
 
 	t.Run("Download and upload imagefile fails wrong url", func(t *testing.T) {
-
-		err := g.DownloadImageAndUploadAsDataUrl("https://foo.bar", "first")
+		ctx := context.Background()
+		err := g.DownloadImageAndUploadAsDataURL(ctx, "https://foo.bar", "first")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "dial tcp: lookup foo.ba")
 
 	})
 
-
 	t.Run("Download and upload file", func(t *testing.T) {
+		ctx := context.Background()
 		//need flow in account to upload image
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
@@ -101,7 +103,7 @@ transaction {
 			Test(t).
 			AssertSuccess()
 
-		err := g.DownloadAndUploadFile("https://httpbin.org/image/png", "first")
+		err := g.DownloadAndUploadFile(ctx, "https://httpbin.org/image/png", "first")
 		assert.NoError(t, err)
 
 		g.Transaction(`
@@ -119,6 +121,7 @@ transaction {
 
 	})
 	t.Run("Download image and upload", func(t *testing.T) {
+		ctx := context.Background()
 		//need flow in account to upload image
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
@@ -127,7 +130,7 @@ transaction {
 			Test(t).
 			AssertSuccess()
 
-		err := g.DownloadImageAndUploadAsDataUrl("https://httpbin.org/image/png", "first")
+		err := g.DownloadImageAndUploadAsDataURL(ctx, "https://httpbin.org/image/png", "first")
 		assert.NoError(t, err)
 
 		g.Transaction(`

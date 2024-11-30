@@ -1,54 +1,58 @@
 package gwtf
 
 import (
+	"context"
 	"fmt"
+
 	"log"
 
-	"github.com/enescakir/emoji"
-	"github.com/onflow/flow-cli/pkg/flowkit"
-	"github.com/onflow/flow-cli/pkg/flowkit/config"
-	"github.com/onflow/flow-cli/pkg/flowkit/gateway"
-	"github.com/onflow/flow-cli/pkg/flowkit/output"
-	"github.com/onflow/flow-cli/pkg/flowkit/services"
+	"github.com/onflow/flow-go-sdk/access"
+	"github.com/onflow/flowkit/v2"
+	"github.com/onflow/flowkit/v2/accounts"
+	"github.com/onflow/flowkit/v2/config"
+	"github.com/onflow/flowkit/v2/gateway"
+	"github.com/onflow/flowkit/v2/output"
 	"github.com/spf13/afero"
 )
 
 // GoWithTheFlow Entire configuration to work with Go With the Flow
 type GoWithTheFlow struct {
 	State                        *flowkit.State
-	Services                     *services.Services
+	Client                       access.Client
+	Services                     flowkit.Services
 	Network                      string
 	Logger                       output.Logger
 	PrependNetworkToAccountNames bool
 }
 
-//NewGoWithTheFlowInMemoryEmulator this method is used to create an in memory emulator, deploy all contracts for the emulator and create all accounts
+// NewGoWithTheFlowInMemoryEmulator this method is used to create an in memory emulator, deploy all contracts for the emulator and create all accounts
 func NewGoWithTheFlowInMemoryEmulator() *GoWithTheFlow {
-	return NewGoWithTheFlow(config.DefaultPaths(), "emulator", true, output.InfoLog).InitializeContracts().CreateAccounts("emulator-account")
+	ctx := context.Background()
+	return NewGoWithTheFlow(config.DefaultPaths(), "emulator", true, output.InfoLog).InitializeContracts(ctx).CreateAccounts(ctx, "emulator-account")
 }
 
-//NewTEstingEmulator create new emulator that ignore all log messages
+// NewTestingEmulator create new emulator that ignore all log messages
 func NewTestingEmulator() *GoWithTheFlow {
-	return NewGoWithTheFlow(config.DefaultPaths(), "emulator", true, output.NoneLog).InitializeContracts().CreateAccounts("emulator-account")
+	ctx := context.Background()
+	return NewGoWithTheFlow(config.DefaultPaths(), "emulator", true, output.NoneLog).InitializeContracts(ctx).CreateAccounts(ctx, "emulator-account")
 }
 
-//NewGoWithTheFlowForNetwork creates a new gwtf client for the provided network
+// NewGoWithTheFlowForNetwork creates a new gwtf client for the provided network
 func NewGoWithTheFlowForNetwork(network string) *GoWithTheFlow {
 	return NewGoWithTheFlow(config.DefaultPaths(), network, false, output.InfoLog)
-
 }
 
-//NewGoWithTheFlowEmulator create a new client
+// NewGoWithTheFlowEmulator create a new client
 func NewGoWithTheFlowEmulator() *GoWithTheFlow {
 	return NewGoWithTheFlow(config.DefaultPaths(), "emulator", false, output.InfoLog)
 }
 
-//NewGoWithTheFlowDevNet creates a new gwtf client for devnet/testnet
+// NewGoWithTheFlowDevNet creates a new gwtf client for devnet/testnet
 func NewGoWithTheFlowDevNet() *GoWithTheFlow {
 	return NewGoWithTheFlow(config.DefaultPaths(), "testnet", false, output.InfoLog)
 }
 
-//NewGoWithTheFlowMainNet creates a new gwft client for mainnet
+// NewGoWithTheFlowMainNet creates a new gwft client for mainnet
 func NewGoWithTheFlowMainNet() *GoWithTheFlow {
 	return NewGoWithTheFlow(config.DefaultPaths(), "mainnet", false, output.InfoLog)
 }
@@ -57,21 +61,21 @@ func NewGoWithTheFlowMainNet() *GoWithTheFlow {
 func NewGoWithTheFlow(filenames []string, network string, inMemory bool, loglevel int) *GoWithTheFlow {
 	gwtf, err := NewGoWithTheFlowError(filenames, network, inMemory, loglevel)
 	if err != nil {
-		log.Fatalf("%v error %+v", emoji.PileOfPoo, err)
+		log.Fatalf("error %+v", err)
 	}
 	return gwtf
 }
 
-//DoNotPrependNetworkToAccountNames disable the default behavior of prefixing account names with network-
+// DoNotPrependNetworkToAccountNames disable the default behavior of prefixing account names with network-
 func (f *GoWithTheFlow) DoNotPrependNetworkToAccountNames() *GoWithTheFlow {
 	f.PrependNetworkToAccountNames = false
 	return f
 }
 
-//Account fetch an account from flow.json, prefixing the name with network- as default (can be turned off)
-func (f *GoWithTheFlow) Account(key string) *flowkit.Account {
+// Account fetch an account from flow.json, prefixing the name with network- as default (can be turned off)
+func (f *GoWithTheFlow) Account(key string) *accounts.Account {
 	if f.PrependNetworkToAccountNames {
-		key = fmt.Sprintf("%s-%s", f.Network, key)
+		key = fmt.Sprintf("%s-%s", f.Services.Network().Name, key)
 	}
 
 	account, err := f.State.Accounts().ByName(key)
@@ -80,7 +84,6 @@ func (f *GoWithTheFlow) Account(key string) *flowkit.Account {
 	}
 
 	return account
-
 }
 
 // NewGoWithTheFlowError creates a new local go with the flow client
@@ -93,23 +96,27 @@ func NewGoWithTheFlowError(paths []string, network string, inMemory bool, logLev
 	}
 
 	logger := output.NewStdoutLogger(logLevel)
-	var service *services.Services
+	var service flowkit.Services
 	if inMemory {
-		//YAY we can run it inline in memory!
+		// YAY, we can run it inline in memory!
 		acc, _ := state.EmulatorServiceAccount()
-		gw := gateway.NewEmulatorGateway(acc)
-		service = services.NewServices(gw, state, logger)
+		pk, _ := acc.Key.PrivateKey()
+		gw := gateway.NewEmulatorGateway(&gateway.EmulatorKey{
+			PublicKey: (*pk).PublicKey(),
+			SigAlgo:   acc.Key.SigAlgo(),
+			HashAlgo:  acc.Key.HashAlgo(),
+		})
+		service = flowkit.NewFlowkit(state, config.EmulatorNetwork, gw, logger)
 	} else {
-		network, err := state.Networks().ByName(network)
+		networkDef, err := state.Networks().ByName(network)
 		if err != nil {
 			return nil, err
 		}
-		host := network.Host
-		gw, err := gateway.NewGrpcGateway(host)
+		gw, err := gateway.NewGrpcGateway(*networkDef)
 		if err != nil {
 			return nil, err
 		}
-		service = services.NewServices(gw, state, logger)
+		service = flowkit.NewFlowkit(state, *networkDef, gw, logger)
 	}
 	return &GoWithTheFlow{
 		State:                        state,
@@ -118,5 +125,4 @@ func NewGoWithTheFlowError(paths []string, network string, inMemory bool, logLev
 		Logger:                       logger,
 		PrependNetworkToAccountNames: true,
 	}, nil
-
 }

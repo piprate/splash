@@ -2,17 +2,18 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"log"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/bjartek/go-with-the-flow/v2/gwtf"
+	"github.com/piprate/splash/gwtf"
 )
 
 /*
- Tests must be in the same folder as flow.json with contracts and transactions/scripts in subdirectories in order for the path resolver to work correctly
+Tests must be in the same folder as flow.json with contracts and transactions/scripts in subdirectories in order for the path resolver to work correctly
 */
 func TestTransaction(t *testing.T) {
 	g := gwtf.NewTestingEmulator()
@@ -28,7 +29,7 @@ func TestTransaction(t *testing.T) {
 		g.TransactionFromFile("create_nf_collection").
 			SignProposeAndPayAs("first").
 			Test(t).                                                                                           //This method will return a TransactionResult that we can assert upon
-			AssertFailure("Could not read transaction file from path=./transactions/create_nf_collection.cdc") //we assert that there is a failure
+			AssertFailure("could not read transaction file from path=./transactions/create_nf_collection.cdc") //we assert that there is a failure
 	})
 
 	t.Run("Create NFT collection", func(t *testing.T) {
@@ -51,7 +52,7 @@ func TestTransaction(t *testing.T) {
 			AssertEmitEventName("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").                                                                                                                              //assert the name of a single event
 			AssertEmitEventName("A.0ae53cb6e3f42a79.FlowToken.TokensMinted", "A.0ae53cb6e3f42a79.FlowToken.TokensDeposited", "A.0ae53cb6e3f42a79.FlowToken.MinterCreated").                                //or assert more then one eventname in a go
 			AssertEmitEvent(gwtf.NewTestEvent("A.0ae53cb6e3f42a79.FlowToken.TokensMinted", map[string]interface{}{"amount": "100.00000000"})).                                                             //assert a given event, can also take multiple events if you like
-			AssertEmitEventJson("{\n  \"name\": \"A.0ae53cb6e3f42a79.FlowToken.MinterCreated\",\n  \"time\": \"1970-01-01T00:00:00Z\",\n  \"fields\": {\n    \"allowedAmount\": \"100.00000000\"\n  }\n}") //assert a given event using json, can also take multiple events if you like
+			AssertEmitEventJSON("{\n  \"name\": \"A.0ae53cb6e3f42a79.FlowToken.MinterCreated\",\n  \"time\": \"1970-01-01T00:00:00Z\",\n  \"fields\": {\n    \"allowedAmount\": \"100.00000000\"\n  }\n}") //assert a given event using json, can also take multiple events if you like
 
 	})
 
@@ -102,6 +103,7 @@ transaction(user:Address) {
 	})
 
 	t.Run("Assert print events", func(t *testing.T) {
+		ctx := context.Background()
 		var str bytes.Buffer
 		log.SetOutput(&str)
 		defer log.SetOutput(os.Stdout)
@@ -109,7 +111,7 @@ transaction(user:Address) {
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
-			UFix64Argument("100.0").RunPrintEventsFull()
+			UFix64Argument("100.0").RunPrintEventsFull(ctx)
 
 		assert.Contains(t, str.String(), "A.0ae53cb6e3f42a79.FlowToken.MinterCreated")
 
@@ -120,11 +122,12 @@ transaction(user:Address) {
 		log.SetOutput(&str)
 		defer log.SetOutput(os.Stdout)
 
+		ctx := context.Background()
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
 			UFix64Argument("100.0").
-			RunPrintEvents(map[string][]string{"A.0ae53cb6e3f42a79.FlowToken.TokensDeposited": {"to"}})
+			RunPrintEvents(ctx, map[string][]string{"A.0ae53cb6e3f42a79.FlowToken.TokensDeposited": {"to"}})
 
 		assert.NotContains(t, str.String(), "0x1cf0e2f2f715450")
 	})
