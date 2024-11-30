@@ -1,9 +1,10 @@
 package main
 
 import (
+	"context"
 	"log"
 
-	"github.com/bjartek/go-with-the-flow/v2/gwtf"
+	"github.com/piprate/splash/gwtf"
 )
 
 func main() {
@@ -13,9 +14,9 @@ func main() {
 	eventsFetcher := g.EventFetcher().
 		Last(1000).
 		Event("A.0b2a3299cc857e29.TopShot.Withdraw")
-		//EventIgnoringFields("A.0b2a3299cc857e29.TopShot.Withdraw", []string{"field1", "field"})
+	//EventIgnoringFields("A.0b2a3299cc857e29.TopShot.Withdraw", []string{"field1", "field"})
 
-	events, err := eventsFetcher.Run()
+	events, err := eventsFetcher.Run(context.Background())
 	if err != nil {
 		panic(err)
 	}

@@ -20,6 +20,7 @@ type GoWithTheFlow struct {
 	State                        *flowkit.State
 	Client                       access.Client
 	Services                     flowkit.Services
+	Network                      string
 	Logger                       output.Logger
 	PrependNetworkToAccountNames bool
 }
@@ -120,6 +121,7 @@ func NewGoWithTheFlowError(paths []string, network string, inMemory bool, logLev
 	return &GoWithTheFlow{
 		State:                        state,
 		Services:                     service,
+		Network:                      network,
 		Logger:                       logger,
 		PrependNetworkToAccountNames: true,
 	}, nil

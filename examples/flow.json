@@ -27,6 +27,12 @@
 			"aliases": {
 				"testnet": "0x631e88ae7f1d7c20"
 			}
+		},
+		"ViewResolver": {
+			"source": "./contracts/ViewResolver.cdc",
+			"aliases": {
+				"testnet": "0x631e88ae7f1d7c20"
+			}
 		}
 	},
 	"networks": {
@@ -63,6 +69,7 @@
 	"deployments": {
 		"emulator": {
 			"emulator-account": [
+				"ViewResolver",
 				"NonFungibleToken",
 				"Debug"
 			],

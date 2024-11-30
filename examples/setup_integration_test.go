@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/bjartek/go-with-the-flow/v2/gwtf"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/piprate/splash/gwtf"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSetupIntegration(t *testing.T) {

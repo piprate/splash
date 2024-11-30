@@ -1,17 +1,17 @@
-pub contract Debug {
+access(all) contract Debug {
 
 
-	pub struct Foo{
-		pub let bar: String
+	access(all) struct Foo{
+		access(all) let bar: String
 
 		init(bar: String) {
 			self.bar=bar
 		}
 	}
 
-	pub event Log(msg: String)
+	access(all) event Log(msg: String)
 
-	pub fun log(_ msg: String) : String {
+	access(all) fun log(_ msg: String) : String {
 		emit Log(msg: msg)
 		return msg
 	}
