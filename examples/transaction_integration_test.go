@@ -21,21 +21,21 @@ func TestTransaction(t *testing.T) {
 
 	t.Run("fail on missing signer", func(t *testing.T) {
 		g.TransactionFromFile("create_nft_collection").
-			Test(t). //This method will return a TransactionResult that we can assert upon
+			Test(t).                                         //This method will return a TransactionResult that we can assert upon
 			AssertFailure("You need to set the main signer") //we assert that there is a failure
 	})
 
 	t.Run("fail on wrong transaction name", func(t *testing.T) {
 		g.TransactionFromFile("create_nf_collection").
 			SignProposeAndPayAs("first").
-			Test(t). //This method will return a TransactionResult that we can assert upon
+			Test(t).                                                                                           //This method will return a TransactionResult that we can assert upon
 			AssertFailure("could not read transaction file from path=./transactions/create_nf_collection.cdc") //we assert that there is a failure
 	})
 
 	t.Run("Create NFT collection", func(t *testing.T) {
 		g.TransactionFromFile("create_nft_collection").
 			SignProposeAndPayAs("first").
-			Test(t). //This method will return a TransactionResult that we can assert upon
+			Test(t).         //This method will return a TransactionResult that we can assert upon
 			AssertSuccess(). //Assert that there are no errors and that the transactions succeeds
 			AssertNoEvents() //Assert that we did not emit any events.
 	})
@@ -47,11 +47,11 @@ func TestTransaction(t *testing.T) {
 			UFix64Argument("100.0").
 			Test(t).
 			AssertSuccess().
-			AssertEventCount(3). //assert the number of events returned
-			AssertPartialEvent(gwtf.NewTestEvent("A.0ae53cb6e3f42a79.FlowToken.TokensDeposited", map[string]interface{}{"amount": "100.00000000"})). //assert a given event, can also take multiple events if you like
-			AssertEmitEventName("A.0ae53cb6e3f42a79.FlowToken.TokensMinted"). //assert the name of a single event
-			AssertEmitEventName("A.0ae53cb6e3f42a79.FlowToken.TokensMinted", "A.0ae53cb6e3f42a79.FlowToken.TokensDeposited", "A.0ae53cb6e3f42a79.FlowToken.MinterCreated"). //or assert more then one eventname in a go
-			AssertEmitEvent(gwtf.NewTestEvent("A.0ae53cb6e3f42a79.FlowToken.TokensMinted", map[string]interface{}{"amount": "100.00000000"})). //assert a given event, can also take multiple events if you like
+			AssertEventCount(3).                                                                                                                                                                           //assert the number of events returned
+			AssertPartialEvent(gwtf.NewTestEvent("A.0ae53cb6e3f42a79.FlowToken.TokensDeposited", map[string]interface{}{"amount": "100.00000000"})).                                                       //assert a given event, can also take multiple events if you like
+			AssertEmitEventName("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").                                                                                                                              //assert the name of a single event
+			AssertEmitEventName("A.0ae53cb6e3f42a79.FlowToken.TokensMinted", "A.0ae53cb6e3f42a79.FlowToken.TokensDeposited", "A.0ae53cb6e3f42a79.FlowToken.MinterCreated").                                //or assert more then one eventname in a go
+			AssertEmitEvent(gwtf.NewTestEvent("A.0ae53cb6e3f42a79.FlowToken.TokensMinted", map[string]interface{}{"amount": "100.00000000"})).                                                             //assert a given event, can also take multiple events if you like
 			AssertEmitEventJSON("{\n  \"name\": \"A.0ae53cb6e3f42a79.FlowToken.MinterCreated\",\n  \"time\": \"1970-01-01T00:00:00Z\",\n  \"fields\": {\n    \"allowedAmount\": \"100.00000000\"\n  }\n}") //assert a given event using json, can also take multiple events if you like
 
 	})

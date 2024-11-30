@@ -17,16 +17,16 @@ func main() {
 
 	g := gwtf.NewGoWithTheFlowInMemoryEmulator()
 
-	structValue := cadence.Struct{
-		Fields: []cadence.Value{cadence.String("baz")},
-		StructType: &cadence.StructType{
-			QualifiedIdentifier: "A.f8d6e0586b0a20c7.Debug.Foo",
-			Fields: []cadence.Field{{
-				Identifier: "bar",
-				Type:       cadence.StringType,
-			}},
-		},
-	}
+	structValue := cadence.NewStruct(
+		[]cadence.Value{cadence.String("baz")},
+	)
+	structValue.StructType = cadence.NewStructType(nil,
+		"A.f8d6e0586b0a20c7.Debug.Foo",
+		[]cadence.Field{{
+			Identifier: "bar",
+			Type:       cadence.StringType,
+		}},
+		nil)
 
 	ctx := context.Background()
 
