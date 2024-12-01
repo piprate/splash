@@ -1,4 +1,4 @@
-package gwtf
+package splash
 
 import (
 	"context"
@@ -17,9 +17,9 @@ import (
 )
 
 // TransactionFromFile will start a flow transaction builder
-func (f *GoWithTheFlow) TransactionFromFile(filename string) FlowTransactionBuilder {
+func (c *Connector) TransactionFromFile(filename string) FlowTransactionBuilder {
 	return FlowTransactionBuilder{
-		GoWithTheFlow:  f,
+		Connector:      c,
 		FileName:       filename,
 		Arguments:      []cadence.Value{},
 		PayloadSigners: []*accounts.Account{},
@@ -28,9 +28,9 @@ func (f *GoWithTheFlow) TransactionFromFile(filename string) FlowTransactionBuil
 }
 
 // Transaction will start a flow transaction builder using the inline transaction
-func (f *GoWithTheFlow) Transaction(content string) FlowTransactionBuilder {
+func (c *Connector) Transaction(content string) FlowTransactionBuilder {
 	return FlowTransactionBuilder{
-		GoWithTheFlow:  f,
+		Connector:      c,
 		FileName:       "inline",
 		Content:        content,
 		Arguments:      []cadence.Value{},
@@ -47,26 +47,26 @@ func (tb FlowTransactionBuilder) Gas(limit uint64) FlowTransactionBuilder {
 
 // ProposeAs sets the proposer
 func (tb FlowTransactionBuilder) ProposeAs(proposer string) FlowTransactionBuilder {
-	tb.Proposer = tb.GoWithTheFlow.Account(proposer)
+	tb.Proposer = tb.Connector.Account(proposer)
 	return tb
 }
 
 // PayAs sets the payer
 func (tb FlowTransactionBuilder) PayAs(payer string) FlowTransactionBuilder {
-	tb.Payer = tb.GoWithTheFlow.Account(payer)
+	tb.Payer = tb.Connector.Account(payer)
 	return tb
 }
 
 // SignAndProposeAs set the proposer and envelope signer
 func (tb FlowTransactionBuilder) SignAndProposeAs(signer string) FlowTransactionBuilder {
-	tb.Proposer = tb.GoWithTheFlow.Account(signer)
+	tb.Proposer = tb.Connector.Account(signer)
 	tb.MainSigner = tb.Proposer
 	return tb
 }
 
 // SignProposeAndPayAs set the payer, proposer and envelope signer
 func (tb FlowTransactionBuilder) SignProposeAndPayAs(signer string) FlowTransactionBuilder {
-	tb.Proposer = tb.GoWithTheFlow.Account(signer)
+	tb.Proposer = tb.Connector.Account(signer)
 	tb.Payer = tb.Proposer
 	tb.MainSigner = tb.Proposer
 	return tb
@@ -74,8 +74,8 @@ func (tb FlowTransactionBuilder) SignProposeAndPayAs(signer string) FlowTransact
 
 // SignProposeAndPayAsService set the payer, proposer and envelope signer
 func (tb FlowTransactionBuilder) SignProposeAndPayAsService() FlowTransactionBuilder {
-	key := fmt.Sprintf("%s-account", tb.GoWithTheFlow.Services.Network().Name)
-	account, err := tb.GoWithTheFlow.State.Accounts().ByName(key)
+	key := fmt.Sprintf("%s-account", tb.Connector.Services.Network().Name)
+	account, err := tb.Connector.State.Accounts().ByName(key)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func (tb FlowTransactionBuilder) RawAccountArgument(key string) FlowTransactionB
 
 // AccountArgument add an account as an argument
 func (tb FlowTransactionBuilder) AccountArgument(key string) FlowTransactionBuilder {
-	f := tb.GoWithTheFlow
+	f := tb.Connector
 
 	account := f.Account(key)
 	return tb.Argument(cadence.BytesToAddress(account.Address.Bytes()))
@@ -265,7 +265,7 @@ func (tb FlowTransactionBuilder) StringArrayArgument(value ...string) FlowTransa
 
 // PayloadSigner set a signer for the payload
 func (tb FlowTransactionBuilder) PayloadSigner(value string) FlowTransactionBuilder {
-	signer := tb.GoWithTheFlow.Account(value)
+	signer := tb.Connector.Account(value)
 	tb.PayloadSigners = append(tb.PayloadSigners, signer)
 	return tb
 }
@@ -284,7 +284,7 @@ func (tb FlowTransactionBuilder) RunPrintEvents(ctx context.Context, ignoreField
 func (tb FlowTransactionBuilder) Run(ctx context.Context) []flow.Event {
 	events, err := tb.RunE(ctx)
 	if err != nil {
-		tb.GoWithTheFlow.Logger.Error(fmt.Sprintf("Error executing script: %s output %v", tb.FileName, err))
+		tb.Connector.Logger.Error(fmt.Sprintf("Error executing script: %s output %v", tb.FileName, err))
 		os.Exit(1)
 	}
 	return events
@@ -329,7 +329,7 @@ func (tb FlowTransactionBuilder) RunE(ctx context.Context) ([]flow.Event, error)
 	// we append the Payer at the end here so that it signs last
 	signers = append(signers, tb.Payer)
 
-	tx, err := tb.GoWithTheFlow.Services.BuildTransaction(
+	tx, err := tb.Connector.Services.BuildTransaction(
 		ctx,
 		transactions.AddressesRoles{
 			Proposer:    tb.Proposer.Address,
@@ -360,7 +360,7 @@ func (tb FlowTransactionBuilder) RunE(ctx context.Context) ([]flow.Event, error)
 		}
 	}
 
-	_, res, err := tb.GoWithTheFlow.Services.SendSignedTransaction(ctx, tx)
+	_, res, err := tb.Connector.Services.SendSignedTransaction(ctx, tx)
 	if err != nil {
 		return nil, err
 	}
@@ -369,7 +369,7 @@ func (tb FlowTransactionBuilder) RunE(ctx context.Context) ([]flow.Event, error)
 		return nil, res.Error
 	}
 
-	tb.GoWithTheFlow.Logger.Debug(fmt.Sprintf("Transaction %s successfully applied", tx.FlowTransaction().ID()))
+	tb.Connector.Logger.Debug(fmt.Sprintf("Transaction %s successfully applied", tx.FlowTransaction().ID()))
 	return res.Events, nil
 }
 
@@ -377,7 +377,7 @@ func (tb FlowTransactionBuilder) getContractCode(codeFileName string) ([]byte, e
 	code := []byte(tb.Content)
 	var err error
 	if tb.Content == "" {
-		code, err = tb.GoWithTheFlow.State.ReaderWriter().ReadFile(codeFileName)
+		code, err = tb.Connector.State.ReaderWriter().ReadFile(codeFileName)
 		if err != nil {
 			return nil, fmt.Errorf("could not read transaction file from path=%s", codeFileName)
 		}
@@ -387,7 +387,7 @@ func (tb FlowTransactionBuilder) getContractCode(codeFileName string) ([]byte, e
 
 // FlowTransactionBuilder used to create a builder pattern for a transaction
 type FlowTransactionBuilder struct {
-	GoWithTheFlow  *GoWithTheFlow
+	Connector      *Connector
 	FileName       string
 	Content        string
 	Arguments      []cadence.Value

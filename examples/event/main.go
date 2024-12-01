@@ -4,12 +4,12 @@ import (
 	"context"
 	"log"
 
-	"github.com/piprate/splash/gwtf"
+	"github.com/piprate/splash"
 )
 
 func main() {
 
-	g := gwtf.NewGoWithTheFlowDevNet()
+	g := splash.NewConnectorTestNet()
 
 	eventsFetcher := g.EventFetcher().
 		Last(1000).
@@ -24,6 +24,6 @@ func main() {
 	log.Printf("%v", events)
 
 	//to send events to a discord eventhook use
-	//	message, err := gwtf.NewDiscordWebhook("http://your-webhook-url").SendEventsToWebhook(events)
+	//	message, err := g.NewDiscordWebhook("http://your-webhook-url").SendEventsToWebhook(events)
 
 }

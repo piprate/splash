@@ -3,34 +3,34 @@ package main
 import (
 	"testing"
 
-	"github.com/piprate/splash/gwtf"
+	"github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetupIntegration(t *testing.T) {
 
 	t.Run("Should create inmemory emulator client", func(t *testing.T) {
-		g := gwtf.NewGoWithTheFlowInMemoryEmulator()
+		g := splash.NewConnectorInMemoryEmulator()
 		assert.Equal(t, "emulator", g.Network)
 	})
 
 	t.Run("Should create local emulator client", func(t *testing.T) {
-		g := gwtf.NewGoWithTheFlowEmulator()
+		g := splash.NewConnectorEmulator()
 		assert.Equal(t, "emulator", g.Network)
 	})
 
 	t.Run("Should create testnet client", func(t *testing.T) {
-		g := gwtf.NewGoWithTheFlowDevNet()
+		g := splash.NewConnectorTestNet()
 		assert.Equal(t, "testnet", g.Network)
 	})
 
 	t.Run("Should create testnet client with for network method", func(t *testing.T) {
-		g := gwtf.NewGoWithTheFlowForNetwork("testnet")
+		g := splash.NewConnectorForNetwork("testnet")
 		assert.Equal(t, "testnet", g.Network)
 	})
 
 	t.Run("Should create mainnet client", func(t *testing.T) {
-		g := gwtf.NewGoWithTheFlowMainNet()
+		g := splash.NewConnectorMainNet()
 		assert.Equal(t, "mainnet", g.Network)
 		assert.True(t, g.PrependNetworkToAccountNames)
 		g = g.DoNotPrependNetworkToAccountNames()

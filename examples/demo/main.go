@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/onflow/cadence"
-	"github.com/piprate/splash/gwtf"
+	"github.com/piprate/splash"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	// - then it looks at all the accounts that does not have contracts in them and create those accounts. These can be used as stakeholders in your "storyline" below.
 	// - when referencing accounts in the "storyline" below note that the default option is to prepened the network to the account name, This is done so that it is easy to run a storyline against emulator, tesnet and mainnet. This can be disabled with the `DoNotPrependNetworkToAccountNames` method on the g object below.
 
-	g := gwtf.NewGoWithTheFlowInMemoryEmulator()
+	g := splash.NewConnectorInMemoryEmulator()
 
 	structValue := cadence.NewStruct(
 		[]cadence.Value{cadence.String("baz")},
@@ -41,7 +41,7 @@ transaction(value:Debug.Foo) {
 
 	//this first transaction will setup a NFTCollection for the user "emulator-first".
 	// transactions are looked up in the `transactions` folder.
-	//if we cHange the initialization of gwtf to testnet above the account used here would be "testnet-first".
+	//if we change the initialization of splash to testnet above the account used here would be "testnet-first".
 	// finally we run the transaction and print all the events, there are several convenience methods to filter out fields from events of not print them at all if you like.
 	g.TransactionFromFile("create_nft_collection").SignProposeAndPayAs("first").RunPrintEventsFull(ctx)
 

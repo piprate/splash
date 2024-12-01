@@ -1,4 +1,4 @@
-package gwtf
+package splash
 
 import (
 	"context"
@@ -11,41 +11,41 @@ import (
 	"github.com/onflow/flowkit/v2/accounts"
 )
 
-func (f *GoWithTheFlow) CreateAccounts(ctx context.Context, saAccountName string) *GoWithTheFlow {
-	gwtf, err := f.CreateAccountsE(ctx, saAccountName)
+func (c *Connector) CreateAccounts(ctx context.Context, saAccountName string) *Connector {
+	conn, err := c.CreateAccountsE(ctx, saAccountName)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return gwtf
+	return conn
 }
 
 // CreateAccountsE ensures that all accounts present in the deployment block for the given network is present
-func (f *GoWithTheFlow) CreateAccountsE(ctx context.Context, saAccountName string) (*GoWithTheFlow, error) {
-	p := f.State
+func (c *Connector) CreateAccountsE(ctx context.Context, saAccountName string) (*Connector, error) {
+	p := c.State
 	signerAccount, err := p.Accounts().ByName(saAccountName)
 	if err != nil {
 		return nil, err
 	}
 
-	accountList := *p.AccountsForNetwork(f.Services.Network())
+	accountList := *p.AccountsForNetwork(c.Services.Network())
 	accountNames := accountList.Names()
 	sort.Strings(accountNames)
 
-	f.Logger.Info(fmt.Sprintf("%v\n", accountNames))
+	c.Logger.Info(fmt.Sprintf("%v\n", accountNames))
 
 	for _, accountName := range accountNames {
-		f.Logger.Debug(fmt.Sprintf("Ensuring account with name '%s' is present", accountName))
+		c.Logger.Debug(fmt.Sprintf("Ensuring account with name '%s' is present", accountName))
 
 		// this error can never happen here, there is a test for it.
 		account, _ := p.Accounts().ByName(accountName)
 
-		if _, err := f.Services.GetAccount(ctx, account.Address); err == nil {
-			f.Logger.Debug("Account is present")
+		if _, err := c.Services.GetAccount(ctx, account.Address); err == nil {
+			c.Logger.Debug("Account is present")
 			continue
 		}
 
-		a, _, err := f.Services.CreateAccount(
+		a, _, err := c.Services.CreateAccount(
 			ctx,
 			signerAccount,
 			[]accounts.PublicKey{{
@@ -57,31 +57,31 @@ func (f *GoWithTheFlow) CreateAccountsE(ctx context.Context, saAccountName strin
 		if err != nil {
 			return nil, err
 		}
-		f.Logger.Info("Account created " + a.Address.String())
+		c.Logger.Info("Account created " + a.Address.String())
 		if a.Address.String() != account.Address.String() {
 			// this condition happens when we create accounts defined in flow.json
 			// after some other accounts were created manually.
 			// In this case, account addresses may not match the expected values
-			f.Logger.Error("Account address mismatch. Expected " + account.Address.String() + ", got " + a.Address.String())
+			c.Logger.Error("Account address mismatch. Expected " + account.Address.String() + ", got " + a.Address.String())
 		}
 	}
-	return f, nil
+	return c, nil
 }
 
 // InitializeContracts installs all contracts in the deployment block for the configured network
-func (f *GoWithTheFlow) InitializeContracts(ctx context.Context) *GoWithTheFlow {
-	if err := f.InitializeContractsE(ctx); err != nil {
+func (c *Connector) InitializeContracts(ctx context.Context) *Connector {
+	if err := c.InitializeContractsE(ctx); err != nil {
 		log.Fatal(err)
 	}
 
-	return f
+	return c
 }
 
 // InitializeContractsE installs all contracts in the deployment block for the configured network
 // and returns an error if it fails.
-func (f *GoWithTheFlow) InitializeContractsE(ctx context.Context) error {
-	f.Logger.Info("Deploying contracts")
-	if _, err := f.Services.DeployProject(ctx, flowkit.UpdateExistingContract(true)); err != nil {
+func (c *Connector) InitializeContractsE(ctx context.Context) error {
+	c.Logger.Info("Deploying contracts")
+	if _, err := c.Services.DeployProject(ctx, flowkit.UpdateExistingContract(true)); err != nil {
 		return err
 	}
 

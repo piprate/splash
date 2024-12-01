@@ -1,4 +1,4 @@
-package gwtf
+package splash
 
 import (
 	"context"
@@ -13,16 +13,16 @@ import (
 
 // FlowScriptBuilder is a struct to hold information for running a script
 type FlowScriptBuilder struct {
-	GoWithTheFlow  *GoWithTheFlow
+	Connector      *Connector
 	FileName       string
 	Arguments      []cadence.Value
 	ScriptAsString string
 }
 
 // Script start a script builder with the inline script as body
-func (f *GoWithTheFlow) Script(content string) FlowScriptBuilder {
+func (c *Connector) Script(content string) FlowScriptBuilder {
 	return FlowScriptBuilder{
-		GoWithTheFlow:  f,
+		Connector:      c,
 		FileName:       "inline",
 		Arguments:      []cadence.Value{},
 		ScriptAsString: content,
@@ -30,9 +30,9 @@ func (f *GoWithTheFlow) Script(content string) FlowScriptBuilder {
 }
 
 // ScriptFromFile will start a flow script builder
-func (f *GoWithTheFlow) ScriptFromFile(filename string) FlowScriptBuilder {
+func (c *Connector) ScriptFromFile(filename string) FlowScriptBuilder {
 	return FlowScriptBuilder{
-		GoWithTheFlow:  f,
+		Connector:      c,
 		FileName:       filename,
 		Arguments:      []cadence.Value{},
 		ScriptAsString: "",
@@ -41,7 +41,7 @@ func (f *GoWithTheFlow) ScriptFromFile(filename string) FlowScriptBuilder {
 
 // AccountArgument add an account as an argument
 func (t FlowScriptBuilder) AccountArgument(key string) FlowScriptBuilder {
-	f := t.GoWithTheFlow
+	f := t.Connector
 
 	account := f.Account(key)
 	return t.Argument(cadence.BytesToAddress(account.Address.Bytes()))
@@ -204,7 +204,7 @@ func (t FlowScriptBuilder) Run(ctx context.Context) {
 // RunReturns executes a read only script
 func (t FlowScriptBuilder) RunReturns(ctx context.Context) (cadence.Value, error) {
 
-	f := t.GoWithTheFlow
+	f := t.Connector
 	scriptFilePath := fmt.Sprintf("./scripts/%s.cdc", t.FileName)
 
 	var err error
@@ -238,7 +238,7 @@ func (t FlowScriptBuilder) RunReturns(ctx context.Context) (cadence.Value, error
 func (t FlowScriptBuilder) RunFailOnError(ctx context.Context) cadence.Value {
 	result, err := t.RunReturns(ctx)
 	if err != nil {
-		t.GoWithTheFlow.Logger.Error(fmt.Sprintf("Error executing script: %s output %v", t.FileName, err))
+		t.Connector.Logger.Error(fmt.Sprintf("Error executing script: %s output %v", t.FileName, err))
 		os.Exit(1)
 	}
 	return result

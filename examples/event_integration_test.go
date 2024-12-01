@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/piprate/splash/gwtf"
+	"github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,7 +14,7 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Test that from index cannot be negative", func(t *testing.T) {
 		ctx := context.Background()
-		g := gwtf.NewTestingEmulator()
+		g := splash.NewTestingEmulator()
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
@@ -30,7 +30,7 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Fetch last events", func(t *testing.T) {
 		ctx := context.Background()
-		g := gwtf.NewTestingEmulator()
+		g := splash.NewTestingEmulator()
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
@@ -46,7 +46,7 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Fetch last events and sort them ", func(t *testing.T) {
 		ctx := context.Background()
-		g := gwtf.NewTestingEmulator()
+		g := splash.NewTestingEmulator()
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
@@ -71,7 +71,7 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Fetch last write progress file", func(t *testing.T) {
 		ctx := context.Background()
-		g := gwtf.NewTestingEmulator()
+		g := splash.NewTestingEmulator()
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
@@ -91,7 +91,7 @@ func TestEvents(t *testing.T) {
 		err := os.WriteFile("progress", []byte("invalid"), fs.ModePerm)
 		assert.NoError(t, err)
 
-		g := gwtf.NewTestingEmulator()
+		g := splash.NewTestingEmulator()
 		_, err = g.EventFetcher().Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").TrackProgressIn("progress").Run(ctx)
 		defer os.Remove("progress")
 		assert.Error(t, err)
@@ -103,7 +103,7 @@ func TestEvents(t *testing.T) {
 		err := os.WriteFile("progress", []byte("1"), fs.ModePerm)
 		assert.NoError(t, err)
 
-		g := gwtf.NewTestingEmulator()
+		g := splash.NewTestingEmulator()
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").

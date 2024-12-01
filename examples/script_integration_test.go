@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/piprate/splash/gwtf"
+	"github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestScript(t *testing.T) {
 	ctx := context.Background()
-	g := gwtf.NewTestingEmulator()
-	t.Parallel()
+	g := splash.NewTestingEmulator()
+	//t.Parallel()
 
 	t.Run("Raw account argument", func(t *testing.T) {
 		value := g.ScriptFromFile("test").RawAccountArgument("0x1cf0e2f2f715450").RunReturnsInterface(ctx)

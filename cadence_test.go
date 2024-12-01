@@ -1,9 +1,10 @@
-package gwtf
+package splash_test
 
 import (
 	"testing"
 
 	"github.com/onflow/cadence"
+	. "github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
 )
 

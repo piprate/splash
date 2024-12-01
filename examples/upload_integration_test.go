@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/piprate/splash/gwtf"
+	"github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTransactionUpload(t *testing.T) {
-	g := gwtf.NewTestingEmulator()
+	g := splash.NewTestingEmulator()
 
 	t.Run("Upload image file invalid file", func(t *testing.T) {
 		ctx := context.Background()
