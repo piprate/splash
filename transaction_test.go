@@ -4,16 +4,18 @@ import (
 	"testing"
 
 	"github.com/onflow/cadence"
-	"github.com/onflow/flowkit/v2/output"
 	. "github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 /*
 Tests must be in the same folder as flow.json with contracts and transactions/scripts in subdirectories in order for the path resolver to work correctly
 */
 func TestTransactionArguments(t *testing.T) {
-	g := NewConnector([]string{"examples/flow.json"}, "emulator", true, output.NoneLog)
+	g, err := NewInMemoryTestConnector("examples", false)
+	require.NoError(t, err)
+
 	t.Parallel()
 
 	t.Run("Gas test", func(t *testing.T) {

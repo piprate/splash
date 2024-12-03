@@ -4,14 +4,15 @@ import (
 	"os"
 	"testing"
 
-	"github.com/onflow/flowkit/v2/output"
 	. "github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEvent(t *testing.T) {
 
-	g := NewConnector([]string{"examples/flow.json"}, "emulator", true, output.NoneLog)
+	g, err := NewInMemoryTestConnector("examples", false)
+	require.NoError(t, err)
 
 	t.Run("Start argument", func(t *testing.T) {
 		ef := g.EventFetcher().Start(100)

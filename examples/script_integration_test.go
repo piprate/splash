@@ -1,4 +1,4 @@
-package main
+package examples_test
 
 import (
 	"context"
@@ -6,12 +6,15 @@ import (
 
 	"github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestScript(t *testing.T) {
 	ctx := context.Background()
-	g := splash.NewTestingEmulator()
-	//t.Parallel()
+	g, err := splash.NewConnectorInMemoryEmulator()
+	require.NoError(t, err)
+
+	t.Parallel()
 
 	t.Run("Raw account argument", func(t *testing.T) {
 		value := g.ScriptFromFile("test").RawAccountArgument("0x1cf0e2f2f715450").RunReturnsInterface(ctx)

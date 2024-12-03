@@ -1,4 +1,4 @@
-package main
+package examples_test
 
 import (
 	"context"
@@ -8,13 +8,15 @@ import (
 
 	"github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEvents(t *testing.T) {
 
 	t.Run("Test that from index cannot be negative", func(t *testing.T) {
 		ctx := context.Background()
-		g := splash.NewTestingEmulator()
+		g, err := splash.NewConnectorInMemoryEmulator()
+		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
@@ -23,14 +25,15 @@ func TestEvents(t *testing.T) {
 			AssertSuccess().
 			AssertEventCount(3)
 
-		_, err := g.EventFetcher().End(2).From(-10).Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").Run(ctx)
+		_, err = g.EventFetcher().End(2).From(-10).Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").Run(ctx)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "FromIndex is negative")
 	})
 
 	t.Run("Fetch last events", func(t *testing.T) {
 		ctx := context.Background()
-		g := splash.NewTestingEmulator()
+		g, err := splash.NewConnectorInMemoryEmulator()
+		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
@@ -46,7 +49,8 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Fetch last events and sort them ", func(t *testing.T) {
 		ctx := context.Background()
-		g := splash.NewTestingEmulator()
+		g, err := splash.NewConnectorInMemoryEmulator()
+		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
@@ -71,7 +75,8 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Fetch last write progress file", func(t *testing.T) {
 		ctx := context.Background()
-		g := splash.NewTestingEmulator()
+		g, err := splash.NewConnectorInMemoryEmulator()
+		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").
@@ -91,7 +96,8 @@ func TestEvents(t *testing.T) {
 		err := os.WriteFile("progress", []byte("invalid"), fs.ModePerm)
 		assert.NoError(t, err)
 
-		g := splash.NewTestingEmulator()
+		g, err := splash.NewConnectorInMemoryEmulator()
+		require.NoError(t, err)
 		_, err = g.EventFetcher().Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").TrackProgressIn("progress").Run(ctx)
 		defer os.Remove("progress")
 		assert.Error(t, err)
@@ -103,7 +109,9 @@ func TestEvents(t *testing.T) {
 		err := os.WriteFile("progress", []byte("1"), fs.ModePerm)
 		assert.NoError(t, err)
 
-		g := splash.NewTestingEmulator()
+		g, err := splash.NewConnectorInMemoryEmulator()
+		require.NoError(t, err)
+
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
 			AccountArgument("first").

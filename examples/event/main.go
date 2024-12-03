@@ -9,7 +9,11 @@ import (
 
 func main() {
 
-	g := splash.NewConnectorTestNet()
+	g, err := splash.NewConnectorTestNet()
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
 	eventsFetcher := g.EventFetcher().
 		Last(1000).

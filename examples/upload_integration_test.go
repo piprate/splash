@@ -1,4 +1,4 @@
-package main
+package examples_test
 
 import (
 	"context"
@@ -6,10 +6,12 @@ import (
 
 	"github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTransactionUpload(t *testing.T) {
-	g := splash.NewTestingEmulator()
+	g, err := splash.NewConnectorInMemoryEmulator()
+	require.NoError(t, err)
 
 	t.Run("Upload image file invalid file", func(t *testing.T) {
 		ctx := context.Background()

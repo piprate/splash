@@ -1,4 +1,4 @@
-package main
+package examples_test
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/piprate/splash"
 )
@@ -16,7 +17,9 @@ import (
 Tests must be in the same folder as flow.json with contracts and transactions/scripts in subdirectories in order for the path resolver to work correctly
 */
 func TestTransaction(t *testing.T) {
-	g := splash.NewTestingEmulator()
+	g, err := splash.NewConnectorInMemoryEmulator()
+	require.NoError(t, err)
+
 	t.Parallel()
 
 	t.Run("fail on missing signer", func(t *testing.T) {
