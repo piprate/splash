@@ -7,11 +7,14 @@ toolchain go1.23.3
 require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/onflow/cadence v1.2.1
+	github.com/onflow/flow-emulator v1.1.0
 	github.com/onflow/flow-go-sdk v1.2.2
 	github.com/onflow/flowkit/v2 v2.1.0
+	github.com/rs/zerolog v1.33.0
 	github.com/spf13/afero v1.10.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a
+	google.golang.org/grpc v1.63.2
 )
 
 require (
@@ -149,7 +152,6 @@ require (
 	github.com/onflow/crypto v0.25.2 // indirect
 	github.com/onflow/flow-core-contracts/lib/go/contracts v1.4.0 // indirect
 	github.com/onflow/flow-core-contracts/lib/go/templates v1.4.0 // indirect
-	github.com/onflow/flow-emulator v1.1.0 // indirect
 	github.com/onflow/flow-ft/lib/go/contracts v1.0.1 // indirect
 	github.com/onflow/flow-ft/lib/go/templates v1.0.1 // indirect
 	github.com/onflow/flow-go v0.38.0-preview.0.0.20241022154145-6a254edbec23 // indirect
@@ -175,7 +177,6 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
-	github.com/rs/zerolog v1.33.0 // indirect
 	github.com/sethvargo/go-retry v0.2.3 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
 	github.com/slok/go-http-metrics v0.10.0 // indirect
@@ -227,7 +228,6 @@ require (
 	google.golang.org/genproto v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240227224415-6ceb2ff114de // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240227224415-6ceb2ff114de // indirect
-	google.golang.org/grpc v1.63.2 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

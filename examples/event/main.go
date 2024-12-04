@@ -4,12 +4,13 @@ import (
 	"context"
 	"log"
 
+	"github.com/onflow/flowkit/v2/output"
 	"github.com/piprate/splash"
 )
 
 func main() {
 
-	g, err := splash.NewConnectorTestNet()
+	g, err := splash.NewConnectorDefault("testnet", output.InfoLog)
 	if err != nil {
 		log.Fatal(err)
 		return

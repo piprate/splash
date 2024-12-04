@@ -11,7 +11,7 @@ import (
 
 func TestScript(t *testing.T) {
 	ctx := context.Background()
-	g, err := splash.NewConnectorInMemoryEmulator()
+	g, err := splash.NewInMemoryTestConnector(".", false)
 	require.NoError(t, err)
 
 	t.Parallel()

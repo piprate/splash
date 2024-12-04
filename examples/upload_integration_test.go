@@ -10,7 +10,7 @@ import (
 )
 
 func TestTransactionUpload(t *testing.T) {
-	g, err := splash.NewConnectorInMemoryEmulator()
+	g, err := splash.NewInMemoryTestConnector(".", false)
 	require.NoError(t, err)
 
 	t.Run("Upload image file invalid file", func(t *testing.T) {

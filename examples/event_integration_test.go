@@ -15,7 +15,7 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Test that from index cannot be negative", func(t *testing.T) {
 		ctx := context.Background()
-		g, err := splash.NewConnectorInMemoryEmulator()
+		g, err := splash.NewInMemoryTestConnector(".", false)
 		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
@@ -32,7 +32,7 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Fetch last events", func(t *testing.T) {
 		ctx := context.Background()
-		g, err := splash.NewConnectorInMemoryEmulator()
+		g, err := splash.NewInMemoryTestConnector(".", false)
 		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
@@ -49,7 +49,7 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Fetch last events and sort them ", func(t *testing.T) {
 		ctx := context.Background()
-		g, err := splash.NewConnectorInMemoryEmulator()
+		g, err := splash.NewInMemoryTestConnector(".", false)
 		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
@@ -75,7 +75,7 @@ func TestEvents(t *testing.T) {
 
 	t.Run("Fetch last write progress file", func(t *testing.T) {
 		ctx := context.Background()
-		g, err := splash.NewConnectorInMemoryEmulator()
+		g, err := splash.NewInMemoryTestConnector(".", false)
 		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
@@ -96,7 +96,7 @@ func TestEvents(t *testing.T) {
 		err := os.WriteFile("progress", []byte("invalid"), fs.ModePerm)
 		assert.NoError(t, err)
 
-		g, err := splash.NewConnectorInMemoryEmulator()
+		g, err := splash.NewInMemoryTestConnector(".", false)
 		require.NoError(t, err)
 		_, err = g.EventFetcher().Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").TrackProgressIn("progress").Run(ctx)
 		defer os.Remove("progress")
@@ -109,7 +109,7 @@ func TestEvents(t *testing.T) {
 		err := os.WriteFile("progress", []byte("1"), fs.ModePerm)
 		assert.NoError(t, err)
 
-		g, err := splash.NewConnectorInMemoryEmulator()
+		g, err := splash.NewInMemoryTestConnector(".", false)
 		require.NoError(t, err)
 
 		g.TransactionFromFile("mint_tokens").

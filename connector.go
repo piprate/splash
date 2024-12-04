@@ -63,6 +63,7 @@ func NewNetworkConnector(paths []string, baseLoader flowkit.ReaderWriter, networ
 		GRPCClient:                   grpcClient,
 		Logger:                       logger,
 		PrependNetworkToAccountNames: true,
+		Network:                      network,
 	}, nil
 }
 
@@ -94,6 +95,7 @@ func NewInMemoryConnector(paths []string, baseLoader flowkit.ReaderWriter, enabl
 		Services:                     service,
 		Logger:                       logger,
 		PrependNetworkToAccountNames: true,
+		Network:                      "emulator",
 	}, nil
 }
 
