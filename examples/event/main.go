@@ -4,13 +4,15 @@ import (
 	"context"
 	"log"
 
+	"github.com/onflow/flowkit/v2/config"
 	"github.com/onflow/flowkit/v2/output"
 	"github.com/piprate/splash"
 )
 
 func main() {
 
-	g, err := splash.NewConnectorDefault("testnet", output.InfoLog)
+	stdoutLogger := output.NewStdoutLogger(output.InfoLog)
+	g, err := splash.NewNetworkConnector(config.DefaultPaths(), splash.NewFileSystemLoader("examples"), "testnet", stdoutLogger)
 	if err != nil {
 		log.Fatal(err)
 		return
@@ -27,8 +29,5 @@ func main() {
 	}
 
 	log.Printf("%v", events)
-
-	//to send events to a discord eventhook use
-	//	message, err := g.NewDiscordWebhook("http://your-webhook-url").SendEventsToWebhook(events)
 
 }

@@ -196,7 +196,7 @@ func (e EventFetcherBuilder) Run(ctx context.Context) ([]*FormatedEvent, error) 
 
 	e.Connector.Logger.Info(fmt.Sprintf("Fetching events from %d to %d", fromIndex, endIndex))
 
-	events := make([]string, len(e.EventsAndIgnoreFields))
+	events := make([]string, 0, len(e.EventsAndIgnoreFields))
 	for key := range e.EventsAndIgnoreFields {
 		events = append(events, key)
 	}
@@ -209,7 +209,7 @@ func (e EventFetcherBuilder) Run(ctx context.Context) ([]*FormatedEvent, error) 
 		return nil, err
 	}
 
-	formatedEvents := FormatEvents(blockEvents, e.EventsAndIgnoreFields)
+	formattedEvents := FormatEvents(blockEvents, e.EventsAndIgnoreFields)
 
 	if e.ProgressFile != "" {
 		err := WriteProgressToFile(e.ProgressFile, endIndex+1)
@@ -217,11 +217,11 @@ func (e EventFetcherBuilder) Run(ctx context.Context) ([]*FormatedEvent, error) 
 			return nil, fmt.Errorf("could not write progress to file %w", err)
 		}
 	}
-	sort.Slice(formatedEvents, func(i, j int) bool {
-		return formatedEvents[i].BlockHeight < formatedEvents[j].BlockHeight
+	sort.Slice(formattedEvents, func(i, j int) bool {
+		return formattedEvents[i].BlockHeight < formattedEvents[j].BlockHeight
 	})
 
-	return formatedEvents, nil
+	return formattedEvents, nil
 }
 
 // PrintEvents prints th events, ignoring fields specified for the given event typeID

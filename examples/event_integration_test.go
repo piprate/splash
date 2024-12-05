@@ -5,11 +5,18 @@ import (
 	"io/fs"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/piprate/splash"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.Stamp})
+}
 
 func TestEvents(t *testing.T) {
 
@@ -19,11 +26,11 @@ func TestEvents(t *testing.T) {
 		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
-			AccountArgument("first").
+			AccountArgument("zero").
 			UFix64Argument("100.0").
 			Test(t).
 			AssertSuccess().
-			AssertEventCount(3)
+			AssertEventCount(4)
 
 		_, err = g.EventFetcher().End(2).From(-10).Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").Run(ctx)
 		assert.Error(t, err)
@@ -36,38 +43,38 @@ func TestEvents(t *testing.T) {
 		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
-			AccountArgument("first").
+			AccountArgument("zero").
 			UFix64Argument("100.0").
 			Test(t).
 			AssertSuccess().
-			AssertEventCount(3)
+			AssertEventCount(4)
 
-		ev, err := g.EventFetcher().Last(2).Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").Run(ctx)
-		assert.NoError(t, err)
+		ev, err := g.EventFetcher().Last(1).Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").Run(ctx)
+		require.NoError(t, err)
 		assert.Equal(t, 1, len(ev))
 	})
 
-	t.Run("Fetch last events and sort them ", func(t *testing.T) {
+	t.Run("Fetch last events and sort them", func(t *testing.T) {
 		ctx := context.Background()
 		g, err := splash.NewInMemoryTestConnector(".", false)
 		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
-			AccountArgument("first").
+			AccountArgument("zero").
 			UFix64Argument("100.0").
 			Test(t).
 			AssertSuccess().
-			AssertEventCount(3)
+			AssertEventCount(4)
 
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
-			AccountArgument("first").
+			AccountArgument("zero").
 			UFix64Argument("100.0").
 			Test(t).
 			AssertSuccess().
-			AssertEventCount(3)
+			AssertEventCount(4)
 
-		ev, err := g.EventFetcher().Last(3).Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").Run(ctx)
+		ev, err := g.EventFetcher().Last(1).Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").Run(ctx)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(ev))
 		assert.True(t, ev[0].BlockHeight < ev[1].BlockHeight)
@@ -79,11 +86,11 @@ func TestEvents(t *testing.T) {
 		require.NoError(t, err)
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
-			AccountArgument("first").
+			AccountArgument("zero").
 			UFix64Argument("100.0").
 			Test(t).
 			AssertSuccess().
-			AssertEventCount(3)
+			AssertEventCount(4)
 
 		ev, err := g.EventFetcher().Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").TrackProgressIn("progress").Run(ctx)
 		defer os.Remove("progress")
@@ -114,11 +121,11 @@ func TestEvents(t *testing.T) {
 
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
-			AccountArgument("first").
+			AccountArgument("zero").
 			UFix64Argument("100.0").
 			Test(t).
 			AssertSuccess().
-			AssertEventCount(3)
+			AssertEventCount(4)
 
 		ev, err := g.EventFetcher().Event("A.0ae53cb6e3f42a79.FlowToken.TokensMinted").TrackProgressIn("progress").Run(ctx)
 		defer os.Remove("progress")

@@ -127,9 +127,9 @@ func (c *Connector) UploadString(ctx context.Context, content, accountName strin
 	// unload previous content if any.
 	if _, err := c.Transaction(`
 	transaction {
-		prepare(signer: AuthAccount) {
+		prepare(signer: auth(Storage) &Account) {
 			let path = /storage/upload
-			let existing = signer.load<String>(from: path) ?? ""
+			let existing = signer.storage.load<String>(from: path) ?? ""
 			log(existing)
 		}
 	}
@@ -141,10 +141,10 @@ func (c *Connector) UploadString(ctx context.Context, content, accountName strin
 	for _, part := range parts {
 		if _, err := c.Transaction(`
 		transaction(part: String) {
-			prepare(signer: AuthAccount) {
+			prepare(signer: auth(Storage) &Account) {
 				let path = /storage/upload
-				let existing = signer.load<String>(from: path) ?? ""
-				signer.save(existing.concat(part), to: path)
+				let existing = signer.storage.load<String>(from: path) ?? ""
+				signer.storage.save(existing.concat(part), to: path)
 				log(signer.address.toString())
 				log(part)
 			}
