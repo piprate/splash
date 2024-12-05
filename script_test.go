@@ -1,25 +1,30 @@
-package gwtf
+package splash_test
 
 import (
 	"context"
 	"testing"
 
 	"github.com/onflow/cadence"
-	"github.com/onflow/flowkit/v2/output"
+	. "github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSetupFails(t *testing.T) {
 
-	g := NewGoWithTheFlow([]string{"../examples/flow.json"}, "emulator", true, output.NoneLog)
+	g, err := NewInMemoryTestConnector("examples", false)
+	require.NoError(t, err)
+
 	ctx := context.Background()
-	_, err := g.CreateAccountsE(ctx, "foobar")
+	_, err = g.CreateAccountsE(ctx, "foobar")
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "could not find account with name foobar")
 }
 
 func TestScriptArguments(t *testing.T) {
-	g := NewGoWithTheFlow([]string{"../examples/flow.json"}, "emulator", true, output.NoneLog)
+	g, err := NewInMemoryTestConnector("examples", false)
+	require.NoError(t, err)
+
 	t.Parallel()
 
 	t.Run("Argument test", func(t *testing.T) {

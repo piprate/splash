@@ -1,4 +1,4 @@
-package gwtf
+package splash
 
 import (
 	"context"
@@ -17,7 +17,7 @@ import (
 
 // EventFetcherBuilder builder to hold info about eventhook context.
 type EventFetcherBuilder struct {
-	GoWithTheFlow         *GoWithTheFlow
+	Connector             *Connector
 	EventsAndIgnoreFields map[string][]string
 	FromIndex             int64
 	EndAtCurrentHeight    bool
@@ -28,9 +28,9 @@ type EventFetcherBuilder struct {
 }
 
 // EventFetcher create an event fetcher builder.
-func (f *GoWithTheFlow) EventFetcher() EventFetcherBuilder {
+func (c *Connector) EventFetcher() EventFetcherBuilder {
 	return EventFetcherBuilder{
-		GoWithTheFlow:         f,
+		Connector:             c,
 		EventsAndIgnoreFields: map[string][]string{},
 		EndAtCurrentHeight:    true,
 		FromIndex:             -10,
@@ -127,7 +127,7 @@ func exists(path string) (bool, error) {
 	return true, err
 }
 
-func writeProgressToFile(fileName string, blockHeight uint64) error {
+func WriteProgressToFile(fileName string, blockHeight uint64) error {
 
 	err := os.WriteFile(fileName, []byte(fmt.Sprintf("%d", blockHeight)), 0o0644) //nolint:gosec // inherited from GWTF
 
@@ -137,7 +137,7 @@ func writeProgressToFile(fileName string, blockHeight uint64) error {
 	return nil
 }
 
-func readProgressFromFile(fileName string) (int64, error) {
+func ReadProgressFromFile(fileName string) (int64, error) {
 	dat, err := os.ReadFile(fileName)
 	if err != nil {
 		return 0, fmt.Errorf("ProgressFile is not valid %w", err)
@@ -160,14 +160,14 @@ func (e EventFetcherBuilder) Run(ctx context.Context) ([]*FormatedEvent, error) 
 		}
 
 		if !present {
-			err := writeProgressToFile(e.ProgressFile, 0)
+			err := WriteProgressToFile(e.ProgressFile, 0)
 			if err != nil {
 				return nil, fmt.Errorf("could not create initial progress file %w", err)
 			}
 
 			e.FromIndex = 0
 		} else {
-			oldHeight, err := readProgressFromFile(e.ProgressFile)
+			oldHeight, err := ReadProgressFromFile(e.ProgressFile)
 			if err != nil {
 				return nil, fmt.Errorf("could not parse progress file as block height %w", err)
 			}
@@ -177,7 +177,7 @@ func (e EventFetcherBuilder) Run(ctx context.Context) ([]*FormatedEvent, error) 
 
 	endIndex := e.EndIndex
 	if e.EndAtCurrentHeight {
-		block, err := e.GoWithTheFlow.Services.GetBlock(ctx, flowkit.LatestBlockQuery)
+		block, err := e.Connector.Services.GetBlock(ctx, flowkit.LatestBlockQuery)
 		if err != nil {
 			return nil, err
 		}
@@ -194,14 +194,14 @@ func (e EventFetcherBuilder) Run(ctx context.Context) ([]*FormatedEvent, error) 
 		return nil, fmt.Errorf("FromIndex is negative")
 	}
 
-	e.GoWithTheFlow.Logger.Info(fmt.Sprintf("Fetching events from %d to %d", fromIndex, endIndex))
+	e.Connector.Logger.Info(fmt.Sprintf("Fetching events from %d to %d", fromIndex, endIndex))
 
-	events := make([]string, len(e.EventsAndIgnoreFields))
+	events := make([]string, 0, len(e.EventsAndIgnoreFields))
 	for key := range e.EventsAndIgnoreFields {
 		events = append(events, key)
 	}
 
-	blockEvents, err := e.GoWithTheFlow.Services.GetEvents(ctx, events, uint64(fromIndex), endIndex, &flowkit.EventWorker{
+	blockEvents, err := e.Connector.Services.GetEvents(ctx, events, uint64(fromIndex), endIndex, &flowkit.EventWorker{
 		Count:           e.NumberOfWorkers,
 		BlocksPerWorker: e.EventBatchSize,
 	})
@@ -209,19 +209,19 @@ func (e EventFetcherBuilder) Run(ctx context.Context) ([]*FormatedEvent, error) 
 		return nil, err
 	}
 
-	formatedEvents := FormatEvents(blockEvents, e.EventsAndIgnoreFields)
+	formattedEvents := FormatEvents(blockEvents, e.EventsAndIgnoreFields)
 
 	if e.ProgressFile != "" {
-		err := writeProgressToFile(e.ProgressFile, endIndex+1)
+		err := WriteProgressToFile(e.ProgressFile, endIndex+1)
 		if err != nil {
 			return nil, fmt.Errorf("could not write progress to file %w", err)
 		}
 	}
-	sort.Slice(formatedEvents, func(i, j int) bool {
-		return formatedEvents[i].BlockHeight < formatedEvents[j].BlockHeight
+	sort.Slice(formattedEvents, func(i, j int) bool {
+		return formattedEvents[i].BlockHeight < formattedEvents[j].BlockHeight
 	})
 
-	return formatedEvents, nil
+	return formattedEvents, nil
 }
 
 // PrintEvents prints th events, ignoring fields specified for the given event typeID

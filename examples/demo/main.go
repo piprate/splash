@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/onflow/cadence"
-	"github.com/piprate/splash/gwtf"
+	"github.com/piprate/splash"
 )
 
 func main() {
@@ -15,7 +15,19 @@ func main() {
 	// - then it looks at all the accounts that does not have contracts in them and create those accounts. These can be used as stakeholders in your "storyline" below.
 	// - when referencing accounts in the "storyline" below note that the default option is to prepened the network to the account name, This is done so that it is easy to run a storyline against emulator, tesnet and mainnet. This can be disabled with the `DoNotPrependNetworkToAccountNames` method on the g object below.
 
-	g := gwtf.NewGoWithTheFlowInMemoryEmulator()
+	g, err := splash.NewInMemoryTestConnector("examples", false)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	ctx := context.Background()
+
+	err = g.CreateAccounts(ctx, "emulator-account").InitializeContractsE(ctx)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
 	structValue := cadence.NewStruct(
 		[]cadence.Value{cadence.String("baz")},
@@ -28,20 +40,18 @@ func main() {
 		}},
 		nil)
 
-	ctx := context.Background()
-
 	g.Transaction(`
 import Debug from "../contracts/Debug.cdc"
 
 transaction(value:Debug.Foo) {
-  prepare(acct: AuthAccount) {
+  prepare(acct: &Account) {
 	Debug.log(value.bar)
  }
 }`).SignProposeAndPayAs("first").Argument(structValue).RunPrintEventsFull(ctx)
 
 	//this first transaction will setup a NFTCollection for the user "emulator-first".
 	// transactions are looked up in the `transactions` folder.
-	//if we cHange the initialization of gwtf to testnet above the account used here would be "testnet-first".
+	//if we change the initialization of splash to testnet above the account used here would be "testnet-first".
 	// finally we run the transaction and print all the events, there are several convenience methods to filter out fields from events of not print them at all if you like.
 	g.TransactionFromFile("create_nft_collection").SignProposeAndPayAs("first").RunPrintEventsFull(ctx)
 
@@ -62,7 +72,7 @@ transaction(value:Debug.Foo) {
 
 	//If you do not want to store a script in a file you can use a inline representation with go multiline strings
 	g.Script(`
-pub fun main(account: Address): String {
+access(all) fun main(account: Address): String {
     return getAccount(account).address.toString()
 }`).AccountArgument("second").Run(ctx)
 
@@ -70,7 +80,7 @@ pub fun main(account: Address): String {
 	g.Transaction(`
 import Debug from "../contracts/Debug.cdc"
 transaction(value:String) {
-  prepare(acct: AuthAccount) {
+  prepare(acct: &Account) {
 	Debug.log(value)
  }
 }`).SignProposeAndPayAs("first").StringArgument("foobar").RunPrintEventsFull(ctx)

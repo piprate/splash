@@ -1,15 +1,21 @@
-package main
+package examples_test
 
 import (
 	"context"
 	"testing"
 
-	"github.com/piprate/splash/gwtf"
+	"github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTransactionUpload(t *testing.T) {
-	g := gwtf.NewTestingEmulator()
+	g, err := splash.NewInMemoryTestConnector(".", false)
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	err = g.CreateAccounts(ctx, "emulator-account").InitializeContractsE(ctx)
+	require.NoError(t, err)
 
 	t.Run("Upload image file invalid file", func(t *testing.T) {
 		ctx := context.Background()
@@ -30,7 +36,7 @@ func TestTransactionUpload(t *testing.T) {
 		//need flow in account to upload
 		g.TransactionFromFile("mint_tokens").
 			SignProposeAndPayAsService().
-			AccountArgument("first").
+			AccountArgument("zero").
 			UFix64Argument("100.0").
 			Test(t).
 			AssertSuccess()
@@ -40,8 +46,8 @@ func TestTransactionUpload(t *testing.T) {
 		g.Transaction(`
 import Debug from "../contracts/Debug.cdc"
 transaction {
-  prepare(account: AuthAccount) {
-    var content= account.load<String>(from: /storage/upload) ?? panic("could not load content")
+  prepare(account: auth(Storage) &Account) {
+    var content= account.storage.load<String>(from: /storage/upload) ?? panic("could not load content")
 	Debug.log(content)
  }
 }`).
@@ -66,8 +72,8 @@ transaction {
 		g.Transaction(`
 import Debug from "../contracts/Debug.cdc"
 transaction {
-  prepare(account: AuthAccount) {
-    var content= account.load<String>(from: /storage/upload) ?? panic("could not load content")
+  prepare(account: auth(Storage) &Account) {
+    var content= account.storage.load<String>(from: /storage/upload) ?? panic("could not load content")
 	Debug.log(content)
  }
 }`).
@@ -109,8 +115,8 @@ transaction {
 		g.Transaction(`
 import Debug from "../contracts/Debug.cdc"
 transaction {
-  prepare(account: AuthAccount) {
-    var content= account.load<String>(from: /storage/upload) ?? panic("could not load content")
+  prepare(account: auth(Storage) &Account) {
+    var content= account.storage.load<String>(from: /storage/upload) ?? panic("could not load content")
 	Debug.log(content)
  }
 }`).
@@ -136,8 +142,8 @@ transaction {
 		g.Transaction(`
 import Debug from "../contracts/Debug.cdc"
 transaction {
-  prepare(account: AuthAccount) {
-    var content= account.load<String>(from: /storage/upload) ?? panic("could not load content")
+  prepare(account: auth(Storage) &Account) {
+    var content= account.storage.load<String>(from: /storage/upload) ?? panic("could not load content")
 	Debug.log(content)
  }
 }`).

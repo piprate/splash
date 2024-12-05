@@ -4,12 +4,19 @@ import (
 	"context"
 	"log"
 
-	"github.com/piprate/splash/gwtf"
+	"github.com/onflow/flowkit/v2/config"
+	"github.com/onflow/flowkit/v2/output"
+	"github.com/piprate/splash"
 )
 
 func main() {
 
-	g := gwtf.NewGoWithTheFlowDevNet()
+	stdoutLogger := output.NewStdoutLogger(output.InfoLog)
+	g, err := splash.NewNetworkConnector(config.DefaultPaths(), splash.NewFileSystemLoader("examples"), "testnet", stdoutLogger)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
 	eventsFetcher := g.EventFetcher().
 		Last(1000).
@@ -22,8 +29,5 @@ func main() {
 	}
 
 	log.Printf("%v", events)
-
-	//to send events to a discord eventhook use
-	//	message, err := gwtf.NewDiscordWebhook("http://your-webhook-url").SendEventsToWebhook(events)
 
 }

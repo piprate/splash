@@ -1,4 +1,4 @@
-package gwtf
+package splash
 
 import (
 	"bufio"
@@ -70,13 +70,13 @@ func fileAsBase64(path string) (string, error) {
 }
 
 // UploadFile reads a file, base64 encodes it and chunk upload to /storage/upload
-func (f *GoWithTheFlow) UploadFile(ctx context.Context, filename, accountName string) error {
+func (c *Connector) UploadFile(ctx context.Context, filename, accountName string) error {
 	content, err := fileAsBase64(filename)
 	if err != nil {
 		return err
 	}
 
-	return f.UploadString(ctx, content, accountName)
+	return c.UploadString(ctx, content, accountName)
 }
 
 func getURL(url string) ([]byte, error) {
@@ -91,45 +91,45 @@ func getURL(url string) ([]byte, error) {
 }
 
 // DownloadAndUploadFile reads a file, base64 encodes it and chunk upload to /storage/upload
-func (f *GoWithTheFlow) DownloadAndUploadFile(ctx context.Context, url, accountName string) error {
+func (c *Connector) DownloadAndUploadFile(ctx context.Context, url, accountName string) error {
 	body, err := getURL(url)
 	if err != nil {
 		return err
 	}
 
 	encoded := base64.StdEncoding.EncodeToString(body)
-	return f.UploadString(ctx, encoded, accountName)
+	return c.UploadString(ctx, encoded, accountName)
 }
 
 // DownloadImageAndUploadAsDataURL download an image and upload as data url
-func (f *GoWithTheFlow) DownloadImageAndUploadAsDataURL(ctx context.Context, url, accountName string) error {
+func (c *Connector) DownloadImageAndUploadAsDataURL(ctx context.Context, url, accountName string) error {
 	body, err := getURL(url)
 	if err != nil {
 		return err
 	}
 	content := contentAsImageDataURL(body)
 
-	return f.UploadString(ctx, content, accountName)
+	return c.UploadString(ctx, content, accountName)
 }
 
 // UploadImageAsDataURL will upload a image file from the filesystem into /storage/upload of the given account
-func (f *GoWithTheFlow) UploadImageAsDataURL(ctx context.Context, filename, accountName string) error {
+func (c *Connector) UploadImageAsDataURL(ctx context.Context, filename, accountName string) error {
 	content, err := fileAsImageData(filename)
 	if err != nil {
 		return err
 	}
 
-	return f.UploadString(ctx, content, accountName)
+	return c.UploadString(ctx, content, accountName)
 }
 
 // UploadString will upload the given string data in 1mb chunks to /storage/upload of the given account
-func (f *GoWithTheFlow) UploadString(ctx context.Context, content, accountName string) error {
+func (c *Connector) UploadString(ctx context.Context, content, accountName string) error {
 	// unload previous content if any.
-	if _, err := f.Transaction(`
+	if _, err := c.Transaction(`
 	transaction {
-		prepare(signer: AuthAccount) {
+		prepare(signer: auth(Storage) &Account) {
 			let path = /storage/upload
-			let existing = signer.load<String>(from: path) ?? ""
+			let existing = signer.storage.load<String>(from: path) ?? ""
 			log(existing)
 		}
 	}
@@ -139,12 +139,12 @@ func (f *GoWithTheFlow) UploadString(ctx context.Context, content, accountName s
 
 	parts := splitByWidthMake(content, 1_000_000)
 	for _, part := range parts {
-		if _, err := f.Transaction(`
+		if _, err := c.Transaction(`
 		transaction(part: String) {
-			prepare(signer: AuthAccount) {
+			prepare(signer: auth(Storage) &Account) {
 				let path = /storage/upload
-				let existing = signer.load<String>(from: path) ?? ""
-				signer.save(existing.concat(part), to: path)
+				let existing = signer.storage.load<String>(from: path) ?? ""
+				signer.storage.save(existing.concat(part), to: path)
 				log(signer.address.toString())
 				log(part)
 			}

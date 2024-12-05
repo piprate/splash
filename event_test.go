@@ -1,16 +1,18 @@
-package gwtf
+package splash_test
 
 import (
 	"os"
 	"testing"
 
-	"github.com/onflow/flowkit/v2/output"
+	. "github.com/piprate/splash"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEvent(t *testing.T) {
 
-	g := NewGoWithTheFlow([]string{"../examples/flow.json"}, "emulator", true, output.NoneLog)
+	g, err := NewInMemoryTestConnector("examples", false)
+	require.NoError(t, err)
 
 	t.Run("Start argument", func(t *testing.T) {
 		ef := g.EventFetcher().Start(100)
@@ -56,7 +58,7 @@ func TestEvent(t *testing.T) {
 	})
 
 	t.Run("failed reading invalid file", func(t *testing.T) {
-		_, err := readProgressFromFile("boing.boinb")
+		_, err := ReadProgressFromFile("boing.boinb")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "ProgressFile is not valid open boing.boinb")
 	})
@@ -66,7 +68,7 @@ func TestEvent(t *testing.T) {
 		assert.NoError(t, err)
 		defer os.RemoveAll("foo")
 
-		err = writeProgressToFile("foo", 1)
+		err = WriteProgressToFile("foo", 1)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "foo: is a directory")
 	})
