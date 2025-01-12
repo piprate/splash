@@ -8,6 +8,7 @@ require (
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/onflow/cadence v1.2.1
 	github.com/onflow/flow-emulator v1.1.0
+	github.com/onflow/flow-go v0.38.0-preview.0.0.20241022154145-6a254edbec23
 	github.com/onflow/flow-go-sdk v1.2.2
 	github.com/onflow/flowkit/v2 v2.1.0
 	github.com/rs/zerolog v1.33.0
@@ -154,7 +155,6 @@ require (
 	github.com/onflow/flow-core-contracts/lib/go/templates v1.4.0 // indirect
 	github.com/onflow/flow-ft/lib/go/contracts v1.0.1 // indirect
 	github.com/onflow/flow-ft/lib/go/templates v1.0.1 // indirect
-	github.com/onflow/flow-go v0.38.0-preview.0.0.20241022154145-6a254edbec23 // indirect
 	github.com/onflow/flow-nft/lib/go/contracts v1.2.2 // indirect
 	github.com/onflow/flow-nft/lib/go/templates v1.2.1 // indirect
 	github.com/onflow/flow/protobuf/go/flow v0.4.7 // indirect

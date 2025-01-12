@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/maps"
 )
 
@@ -19,11 +20,15 @@ type TransactionResult struct {
 func (tb FlowTransactionBuilder) Test(t *testing.T) TransactionResult {
 	locale, _ := time.LoadLocation("UTC")
 	time.Local = locale
-	events, err := tb.RunE(context.Background())
-	formattedEvents := make([]*FormatedEvent, len(events))
-	for i, event := range events {
-		ev := ParseEvent(event, uint64(0), time.Unix(0, 0), []string{})
-		formattedEvents[i] = ev
+	txResult, err := tb.RunE(context.Background())
+	var formattedEvents []*FormatedEvent
+	if err == nil {
+		events := txResult.Events
+		formattedEvents = make([]*FormatedEvent, len(events))
+		for i, event := range events {
+			ev := ParseEvent(event, uint64(0), time.Unix(0, 0), []string{})
+			formattedEvents[i] = ev
+		}
 	}
 	return TransactionResult{
 		Err:     err,
@@ -42,6 +47,11 @@ func (t TransactionResult) AssertFailure(msg string) TransactionResult {
 
 func (t TransactionResult) AssertSuccess() TransactionResult {
 	assert.NoError(t.Testing, t.Err)
+	return t
+}
+
+func (t TransactionResult) RequireSuccess() TransactionResult {
+	require.NoError(t.Testing, t.Err)
 	return t
 }
 

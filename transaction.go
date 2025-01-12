@@ -287,11 +287,11 @@ func (tb FlowTransactionBuilder) Run(ctx context.Context) []flow.Event {
 		tb.Connector.Logger.Error(fmt.Sprintf("Error executing script: %s output %v", tb.FileName, err))
 		os.Exit(1)
 	}
-	return events
+	return events.Events
 }
 
 // RunE runs returns error
-func (tb FlowTransactionBuilder) RunE(ctx context.Context) ([]flow.Event, error) {
+func (tb FlowTransactionBuilder) RunE(ctx context.Context) (*flow.TransactionResult, error) {
 
 	if tb.Proposer == nil {
 		return nil, errors.New("you need to set the proposer")
@@ -370,7 +370,7 @@ func (tb FlowTransactionBuilder) RunE(ctx context.Context) ([]flow.Event, error)
 	}
 
 	tb.Connector.Logger.Debug(fmt.Sprintf("Transaction %s successfully applied", tx.FlowTransaction().ID()))
-	return res.Events, nil
+	return res, nil
 }
 
 func (tb FlowTransactionBuilder) getContractCode(codeFileName string) ([]byte, error) {
