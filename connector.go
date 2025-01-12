@@ -1,17 +1,22 @@
 package splash
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"testing"
 
 	"github.com/onflow/flow-emulator/emulator"
 	"github.com/onflow/flow-go-sdk/access"
 	grpcAccess "github.com/onflow/flow-go-sdk/access/grpc"
+	flowgo "github.com/onflow/flow-go/model/flow"
 	"github.com/onflow/flowkit/v2"
 	"github.com/onflow/flowkit/v2/accounts"
 	"github.com/onflow/flowkit/v2/config"
 	"github.com/onflow/flowkit/v2/gateway"
 	"github.com/onflow/flowkit/v2/output"
+	"github.com/rs/zerolog"
+	zeroLog "github.com/rs/zerolog/log"
 	"github.com/spf13/afero"
 	"google.golang.org/grpc"
 )
@@ -24,6 +29,8 @@ type Connector struct {
 	Network                      string
 	Logger                       output.Logger
 	PrependNetworkToAccountNames bool
+
+	emulatorGateway *EmulatorGateway
 }
 
 // maxGRPCMessageSize 60mb
@@ -82,11 +89,16 @@ func NewInMemoryConnector(paths []string, baseLoader flowkit.ReaderWriter, enabl
 		SigAlgo:   acc.Key.SigAlgo(),
 		HashAlgo:  acc.Key.HashAlgo(),
 	}
-	var gw *gateway.EmulatorGateway
+
+	loggerOpt := emulator.WithServerLogger(
+		zeroLog.Logger.Level(zerolog.InfoLevel).With().Str("module", "emulator").Logger(),
+	)
+
+	var gw *EmulatorGateway
 	if enableTxFees {
-		gw = gateway.NewEmulatorGatewayWithOpts(key, gateway.WithEmulatorOptions(emulator.WithTransactionFeesEnabled(true)))
+		gw = NewEmulatorGatewayWithOpts(key, WithEmulatorOptions(loggerOpt, emulator.WithTransactionFeesEnabled(true)))
 	} else {
-		gw = gateway.NewEmulatorGateway(key)
+		gw = NewEmulatorGatewayWithOpts(key, WithEmulatorOptions(loggerOpt))
 	}
 	service := flowkit.NewFlowkit(state, config.EmulatorNetwork, gw, logger)
 
@@ -96,6 +108,7 @@ func NewInMemoryConnector(paths []string, baseLoader flowkit.ReaderWriter, enabl
 		Logger:                       logger,
 		PrependNetworkToAccountNames: true,
 		Network:                      "emulator",
+		emulatorGateway:              gw,
 	}, nil
 }
 
@@ -127,4 +140,30 @@ func (c *Connector) Account(key string) *accounts.Account {
 	}
 
 	return account
+}
+
+func (c *Connector) EnableAutoMine() *Connector {
+	if c.emulatorGateway != nil {
+		c.emulatorGateway.EnableAutoMine()
+	}
+	return c
+}
+
+func (c *Connector) DisableAutoMine() *Connector {
+	if c.emulatorGateway != nil {
+		c.emulatorGateway.DisableAutoMine()
+	}
+	return c
+}
+
+func (c *Connector) ExecuteAndCommitBlock(t *testing.T) (*flowgo.Block, []TransactionResult, error) { //nolint:thelper
+	if c.emulatorGateway != nil {
+		return c.emulatorGateway.ExecuteAndCommitBlock(t)
+	} else {
+		return nil, nil, errors.New("emulator gateway not initialized")
+	}
+}
+
+func (c *Connector) IsInMemoryEmulator() bool {
+	return c.emulatorGateway != nil
 }

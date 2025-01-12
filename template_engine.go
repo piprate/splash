@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"sync"
 
 	"path"
 	"strings"
@@ -37,6 +38,7 @@ type (
 		client                   *Connector
 		template                 *template.Template
 		preloadedTemplates       map[string]string
+		preloadedTemplatesMutex  sync.Mutex
 		wellKnownAddresses       map[string]string
 		wellKnownAddressesBinary map[string]flow.Address
 	}
@@ -91,11 +93,12 @@ func (e *TemplateEngine) loadContractAddresses(requiredWellKnownContracts []stri
 			return fmt.Errorf("address not found for contract %s", requiredContractName)
 		}
 	}
-	log.Debug().Str("addresses", fmt.Sprintf("%v", e.wellKnownAddresses)).Msg("Loaded contract addresses")
 
 	for name, addr := range e.wellKnownAddressesBinary {
 		e.wellKnownAddresses[name] = addr.HexWithPrefix()
 	}
+
+	log.Debug().Str("addresses", fmt.Sprintf("%v", e.wellKnownAddresses)).Msg("Loaded contract addresses")
 
 	return nil
 }
@@ -117,7 +120,10 @@ func (e *TemplateEngine) GetStandardScript(scriptID string) string {
 		}
 
 		s = buf.String()
+
+		e.preloadedTemplatesMutex.Lock()
 		e.preloadedTemplates[scriptID] = s
+		e.preloadedTemplatesMutex.Unlock()
 	}
 
 	return s
