@@ -48,8 +48,14 @@ const (
 	ParamsKey = "Parameters"
 )
 
-func NewTemplateEngine(client *Connector, templateFS embed.FS, paths []string, requiredWellKnownContracts []string) (*TemplateEngine, error) {
-	goTemplate, err := template.New("").Funcs(funcMap).ParseFS(templateFS, "templates/transactions/*.cdc", "templates/scripts/*.cdc", "templates/scripts/**/*.cdc")
+func NewTemplateEngine(client *Connector, templateFS embed.FS, paths []string, requiredWellKnownContracts []string, patterns ...string) (*TemplateEngine, error) {
+	if len(patterns) == 0 {
+		patterns = make([]string, len(paths))
+		for i, p := range paths {
+			patterns[i] = p + "/*.cdc"
+		}
+	}
+	goTemplate, err := template.New("").Funcs(funcMap).ParseFS(templateFS, patterns...)
 	if err != nil {
 		return nil, err
 	}
