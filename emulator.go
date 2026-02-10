@@ -45,6 +45,8 @@ type EmulatorGateway struct {
 	emulatorOptions []emulator.Option
 }
 
+var _ gateway.Gateway = (*EmulatorGateway)(nil)
+
 func UnwrapStatusError(err error) error {
 	return errors.New(status.Convert(err).Message())
 }
@@ -145,6 +147,30 @@ func (g *EmulatorGateway) GetTransactionsByBlockID(ctx context.Context, id flow.
 		return nil, UnwrapStatusError(err)
 	}
 	return txr, nil
+}
+
+func (g *EmulatorGateway) GetAccountAtBlockHeight(ctx context.Context, address flow.Address, u uint64) (*flow.Account, error) {
+	acct, err := g.adapter.GetAccountAtBlockHeight(ctx, address, u)
+	if err != nil {
+		return nil, UnwrapStatusError(err)
+	}
+	return acct, nil
+}
+
+func (g *EmulatorGateway) GetSystemTransaction(ctx context.Context, blockID flow.Identifier) (*flow.Transaction, error) {
+	return nil, nil
+}
+
+func (g *EmulatorGateway) GetSystemTransactionResult(ctx context.Context, blockID flow.Identifier) (*flow.TransactionResult, error) {
+	return nil, nil
+}
+
+func (g *EmulatorGateway) GetSystemTransactionWithID(ctx context.Context, blockID flow.Identifier, systemTxID flow.Identifier) (*flow.Transaction, error) {
+	return nil, nil
+}
+
+func (g *EmulatorGateway) GetSystemTransactionResultWithID(ctx context.Context, blockID flow.Identifier, systemTxID flow.Identifier) (*flow.TransactionResult, error) {
+	return nil, nil
 }
 
 func (g *EmulatorGateway) Ping() error {
