@@ -250,7 +250,7 @@ func PrintEvents(events []flow.Event, ignoreFields map[string][]string) {
 
 // FormatEvents
 func FormatEvents(blockEvents []flow.BlockEvents, ignoreFields map[string][]string) []*FormatedEvent {
-	var events []*FormatedEvent
+	var events []*FormatedEvent //nolint:prealloc
 
 	for _, blockEvent := range blockEvents {
 		for _, event := range blockEvent.Events {
