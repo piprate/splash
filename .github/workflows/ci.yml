@@ -14,37 +14,34 @@ jobs:
 #      run:
 #        working-directory: lib/go/iinft
     steps:
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v6
         with:
-          go-version: 1.22
+          go-version: '1.24'
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v5
 
-      - id: go-cache-paths
-        run: |
-          echo "::set-output name=go-build::$(go env GOCACHE)"
-          echo "::set-output name=go-mod::$(go env GOMODCACHE)"
-
-      - name: Go Build Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.go-cache-paths.outputs.go-build }}
-          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
-
-      - name: Go Mod Cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.go-cache-paths.outputs.go-mod }}
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+#      - id: go-cache-paths
+#        run: |
+#          echo "::set-output name=go-build::$(go env GOCACHE)"
+#          echo "::set-output name=go-mod::$(go env GOMODCACHE)"
+#
+#      - name: Go Build Cache
+#        uses: actions/cache@v3
+#        with:
+#          path: ${{ steps.go-cache-paths.outputs.go-build }}
+#          key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+#
+#      - name: Go Mod Cache
+#        uses: actions/cache@v3
+#        with:
+#          path: ${{ steps.go-cache-paths.outputs.go-mod }}
+#          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3.2.0
+        uses: golangci/golangci-lint-action@v8.0.0
         with:
           args: "--out-${NO_FUTURE}format colored-line-number --timeout 5m"
-#          working-directory: lib/go/iinft
-          skip-pkg-cache: true
-          skip-build-cache: true
 
   tidy:
     runs-on: ubuntu-latest
@@ -53,7 +50,7 @@ jobs:
         uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: 1.22
+          go-version: '1.24'
       - uses: actions/cache@v3
         with:
           path: |
@@ -64,8 +61,7 @@ jobs:
             ${{ runner.os }}-go-
       - uses: zencargo/github-action-go-mod-tidy@v1
         with:
-#          path: lib/go/iinft
-          go-version: 1.22
+          go-version: '1.24'
 
   test:
     runs-on: ubuntu-latest
@@ -75,7 +71,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: 1.22
+          go-version: '1.24'
       - name: Set up Cache
         uses: actions/cache@v3
         with:
